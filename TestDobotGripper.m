@@ -1,4 +1,4 @@
-%% Create DH parameters for one-finger Gripper
+%% Create DH parameters for two-finger Gripper
 % Finger 1 of Gripper
 finger1 = Link('d',0,'a',0.06,'alpha',0,'offset',0, 'qlim',[deg2rad(0),deg2rad(25)]);
 modelFinger{1} = SerialLink(finger1,'name','Dobot Gripper Finger 1');
