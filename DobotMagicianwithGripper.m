@@ -28,8 +28,10 @@ classdef DobotMagicianwithGripper < handle
 
             self.CreateGripperModel();
             self.PlotandColourGripper();
-
-            self.MoveRobot(self.defaultJoint)
+            
+            % set initial robot position and fully open gripper
+            self.MoveRobot(self.defaultJoint);
+            self.MoveGripper(25);
         end
 
         %% Create the robot model
@@ -154,7 +156,7 @@ classdef DobotMagicianwithGripper < handle
             for linkIndex = 0:self.modelGripper{1}.n
                 handles1 = findobj('Tag', self.modelGripper{1}.name);
                 h1 = get(handles1,'UserData');
-                vertexColours = [0,0.1,0]; % Default colours
+                vertexColours = [0,0,0]; % Default colours
 
                 handles2 = findobj('Tag', self.modelGripper{2}.name);
                 h2 = get(handles2,'UserData');
