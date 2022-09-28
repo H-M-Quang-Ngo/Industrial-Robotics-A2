@@ -6,7 +6,7 @@ hold on
 h = PlaceObject('Carrot.ply',[0,-0.276,0.02]);
 
 % desired joint state at final position
-qPick = [-90 45 35 -35 90]*pi/180;
+qPick = [-90 45 35 -35 -90]*pi/180;
 
 T1 = r.model.fkine(r.model.getpos);
 T2 = r.model.fkine(qPick);

@@ -6,7 +6,7 @@ hold on
 h = PlaceObject('Carrot.ply',[0,-0.276,0.02]);
 
 % desired joint state at final position
-qPick = [-90 45 35 -35 90]*pi/180;
+qPick = [-90 45 35 -35 -90]*pi/180;
 
 T1 = r.model.fkine(r.model.getpos);
 T2 = r.model.fkine(qPick);
@@ -16,7 +16,7 @@ steps = 120;
 T = trinterp(T1,T2,linspace(0,1,steps));
 
 % safe step of time for not exceed each joint's max speed
-timestep = 0.01;
+timestep = 0.05;
 
 % random collision trigger:
 checkCollision = randi([1,steps+10],1,1);
@@ -31,7 +31,7 @@ for i = 1:steps-1
 
     % check collision and try to avoid
     if i == checkCollision
-        if i <= 3*steps/2
+        if i <= steps/2
             disp(['Collision detected at step ',num2str(i),'. Try to avoid!']);
             stepLeft = steps - i;
 
