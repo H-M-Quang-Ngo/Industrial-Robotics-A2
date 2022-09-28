@@ -9,7 +9,10 @@ classdef Dorna2Robot < handle
         %> Workspace
         workspace = [-2 2 -2 2 -0.3 2];
 
-        % default set of joints
+        %> Options to display robot
+        plotopts = {'fps',240,'noarrow','nowrist','noname','tile1color',[1 1 1],'floorlevel',-0.3};
+                
+        %> default set of joints
         defaultJoint = [0 -80 100 -20 0]*pi/180;
     end
 
@@ -41,12 +44,8 @@ classdef Dorna2Robot < handle
                 self.model.points{linkIndex+1} = vertexData;
             end
 
-            % Options to display robot
-            plotopts = {'fps',240,'workspace',self.workspace,...
-                'noarrow','nowrist','noname','tile1color',[1 1 1],'floorlevel',-0.3};
-
             % Display robot
-            self.model.plot3d(zeros(1,self.model.n),plotopts{:});
+            self.model.plot3d(zeros(1,self.model.n),self.plotopts{:},'workspace',self.workspace);
             if isempty(findobj(get(gca,'Children'),'Type','Light'))
                 camlight
             end

@@ -14,10 +14,13 @@ classdef DobotMagicianwithGripper < handle
         name = 'DobotMagicianwithGripper';
 
         %> Workspace
-        workspace = [-2 2 -2 2 -0.3 2];
+        workspace = [-2 2 -2 2 -0.55 2];
+
+        %> Options to display robot
+        plotopts = {'fps',240,'noarrow','nowrist','noname','tile1color',[1 1 1],'floorlevel',-0.55};
 
         %> Default set of joints
-        defaultJoint  = [0,pi/4,pi/4,0,0];
+        defaultJoint  = [0,30,60,-45,0]*pi/180;
     end
 
     methods (Access = public)
@@ -36,9 +39,9 @@ classdef DobotMagicianwithGripper < handle
 
         %% Create the robot model
         function CreateModel(self)
-            L(1) = Link('d',0.103+0.0362,    'a',0,      'alpha',-pi/2,  'offset',0,     'qlim',[deg2rad(-135),deg2rad(135)]);
-            L(2) = Link('d',0,               'a',0.135,  'alpha',0,      'offset',-pi/2, 'qlim',[deg2rad(-5),deg2rad(80)]);
-            L(3) = Link('d',0,               'a',0.147,  'alpha',0,      'offset',0,     'qlim',[deg2rad(-10),deg2rad(85)]);
+            L(1) = Link('d',0.103+0.0362,    'a',0,      'alpha',-pi/2,  'offset',0,     'qlim',[deg2rad(-120),deg2rad(120)]);
+            L(2) = Link('d',0,               'a',0.135,  'alpha',0,      'offset',-pi/2, 'qlim',[deg2rad(-5),deg2rad(90)]);
+            L(3) = Link('d',0,               'a',0.147,  'alpha',0,      'offset',pi/4,  'qlim',[deg2rad(-15),deg2rad(90)]);
             L(4) = Link('d',0,               'a',0.06,   'alpha',pi/2,   'offset',0,     'qlim',[deg2rad(-140),deg2rad(140)]);
             L(5) = Link('d',-0.05,           'a',0,      'alpha',0,      'offset',pi,    'qlim',[deg2rad(-90),deg2rad(90)]);
 
@@ -53,12 +56,8 @@ classdef DobotMagicianwithGripper < handle
                 self.model.points{linkIndex+1} = vertexData;
             end
 
-            % Options to display robot
-            plotopts = {'fps',240,'workspace',self.workspace,...
-                'noarrow','nowrist','noname','tile1color',[1 1 1],'floorlevel',-0.3};
-
             % Display robot
-            self.model.plot3d(zeros(1,self.model.n), plotopts{:});
+            self.model.plot3d(zeros(1,self.model.n), self.plotopts{:}, 'workspace',self.workspace);
             if isempty(findobj(get(gca,'Children'),'Type','Light'))
                 camlight
             end
@@ -144,13 +143,9 @@ classdef DobotMagicianwithGripper < handle
             self.modelGripper{1}.base = self.model.fkine(self.model.getpos)*self.gripperTr;
             self.modelGripper{2}.base = self.model.fkine(self.model.getpos)*self.gripperTr;
 
-            % Options to display gripper
-            plotopts = {'fps',240,'workspace',self.workspace,...
-                'noarrow','nowrist','noname','tile1color',[1 1 1],'floorlevel',-0.3};
-
             % Display Gripper
-            self.modelGripper{1}.plot3d(0, plotopts{:});
-            self.modelGripper{2}.plot3d(0, plotopts{:});
+            self.modelGripper{1}.plot3d(0, self.plotopts{:},'workspace',self.workspace);
+            self.modelGripper{2}.plot3d(0, self.plotopts{:},'workspace',self.workspace);
 
             % Try to manually colour the Gripper
             for linkIndex = 0:self.modelGripper{1}.n
