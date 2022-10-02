@@ -28,26 +28,28 @@ checkCollision = randi([1,steps+10],1,1);
 count = 0;
 
 %% track the trajectory by RRMC
+% the closer the obstacle to the target, the less accurate of the
+% avoidance
 
 while error_displacement > 0.005
 
     % trace the end-effector
-    % plot3(poseCurrent(1,4),poseCurrent(2,4),poseCurrent(3,4),'r.');
+    plot3(poseCurrent(1,4),poseCurrent(2,4),poseCurrent(3,4),'r.');
 
     % check collision and try to avoid
     if count == checkCollision
         disp(['Collision detected at step ',num2str(count)]);
 
         % try to avoid that collision if possible
-        if (count/steps) <= 3/5
+        if (count/steps) < 3/5
             % lift the arm
-            zLift = 0.15;
+            zLift = 0.2;
             T_Lift = transl(0,0,zLift)*poseCurrent;
             RMRCMotion(r,T_Lift,30);
 
             % move in plane xy
-            xMove = 0.05;
-            yMove = 0.05;
+            xMove = 0.08;
+            yMove = 0.08;
             T_xyMove = transl(-xMove,-yMove,0)*T_Lift;
             RMRCMotion(r,T_xyMove,30);
         else

@@ -22,7 +22,7 @@ function RMRCMotion(robot,poseFinal,steps)
         qCurrent = robot.model.getpos;
     
         % trace the end-effector
-        % plot3(poseCurrent(1,4),poseCurrent(2,4),poseCurrent(3,4),'r.');
+        plot3(poseCurrent(1,4),poseCurrent(2,4),poseCurrent(3,4),'r.');
     
         % current difference to the final position
         distanceDiff = transl(poseFinal) - transl(poseCurrent);
@@ -43,23 +43,17 @@ function RMRCMotion(robot,poseFinal,steps)
         qNext = qCurrent + qd'*timestep;
     
         % check the validity of 'qNext':
-%         checkLimit = CheckJointLimit(robot.model,qNext);
-%         if  checkLimit <= robot.model.n
-%             disp(['Step ',num2str(count),'. Warning: exceed joint limit at joint ', num2str(checkLimit), ...
-%                 '. A patch is applied!']);
-%     
-%             % replace the invalid 'qNext' by an IK solution:
-%             poseNext = robot.model.fkine(qNext);
-%             qNext = robot.model.ikcon(poseNext,robot.model.getpos);
-%     
-%             % replace the invalid 'qNext' component by its closet
-%             if qNext(checkLimit) < robot.model.qlim(checkLimit,1)
-%                 qNext(checkLimit) = robot.model.qlim(checkLimit,1);
-%             else
-%                 qNext(checkLimit) = robot.model.qlim(checkLimit,2);
-%             end
-%         end
+        checkLimit = CheckJointLimit(robot.model,qNext);
+        if  checkLimit <= robot.model.n
+            disp(['RMRC step ',num2str(count),'. Warning: exceed joint limit at joint ', num2str(checkLimit), ...
+                '. A patch using IK solution is applied!']);
     
+            % replace the invalid 'qNext' by an IK solution:
+            poseNext = robot.model.fkine(qNext);
+            qNext = robot.model.ikcon(poseNext,robot.model.getpos);
+
+        end
+
         % move robot
         robot.MoveRobot(qNext);
     
