@@ -22,6 +22,13 @@ steps = 50;
 % safe step of time for not exceed each joint's max speed
 timestep = 0.05;
 
+% manipulability threshold
+mani_threshold = 0.0044;
+
+% max damping coefficient 
+damping_coefficient_MAX = 0.05;
+
+
 % random collision trigger:
 checkCollision = randi([1,steps+10],1,1);
 
@@ -45,22 +52,26 @@ while error_displacement > 0.005
             % lift the arm
             zLift = 0.2;
             T_Lift = transl(0,0,zLift)*poseCurrent;
-            RMRCMotion(r,T_Lift,30);
+            RMRCMotion(r,T_Lift,40);
 
             % move in plane xy
             xMove = 0.08;
             yMove = 0.08;
             T_xyMove = transl(-xMove,-yMove,0)*T_Lift;
-            RMRCMotion(r,T_xyMove,30);
+            RMRCMotion(r,T_xyMove,40);
         else
             disp('Cannot find way to avoid this collision. Stop the robot!');
             break;
         end
     end
 
-    % current joint state:
+    % current joint state 
     qCurrent = r.model.getpos;
-
+    
+    % current manipulability and Jacobian
+    mani =  r.model.maniplty(qCurrent);
+    J = r.model.jacob0(qCurrent);
+ 
     % retrieve the current pose
     poseCurrent = r.model.fkine(qCurrent);
 
@@ -68,15 +79,20 @@ while error_displacement > 0.005
     distanceDiff = transl(poseFinal) - transl(poseCurrent);
     angleDiff = tr2rpy(poseFinal) - tr2rpy(poseCurrent);
 
-    % spatial velocity
+    % desired spatial velocity
     u = (distanceDiff/(steps-count))/timestep;
     omega = (angleDiff/(steps-count))/timestep;
 
-    % joint velocity
-    if r.model.n == 6
-        qd = r.model.jacob0(qCurrent) * [u; omega'];
+    % reduce singularity if exists
+    if mani < mani_threshold
+        damping_coefficient = (1-(mani/manithreshold)^2)/damping_coefficient_MAX;
+        J_DLS = J'/(J*J'+ damping_coefficient*eye(6));    % damped least square Jacobian
+        
+        % joint velocity
+        qd = J_DLS * [u; omega'];
     else
-        qd = pinv(r.model.jacob0(qCurrent)) * [u; omega'];
+        % joint velocity
+        qd = pinv(J) * [u; omega'];
     end
 
     % next position
