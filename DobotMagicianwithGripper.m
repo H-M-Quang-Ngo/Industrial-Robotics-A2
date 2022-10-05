@@ -17,10 +17,15 @@ classdef DobotMagicianwithGripper < handle
         workspace = [-2 2 -2 2 -0.55 2];
 
         %> Options to display robot
-        plotopts = {'fps',240,'noarrow','nowrist','noname','tile1color',[1 1 1],'floorlevel',-0.55};
+        plotopts = {'fps',240,'noarrow','nowrist','noname',...
+            'tile1color',[1 1 1],'floorlevel',-0.55};
 
         %> Default set of joints
         defaultJoint  = [0,30,60,-45,0]*pi/180;
+
+        %> Gripped object's transform (no orientation) seen by the end-effector
+        objectTr = transl(0,0,-0.040);
+
     end
 
     methods (Access = public)
@@ -32,9 +37,9 @@ classdef DobotMagicianwithGripper < handle
             self.CreateGripperModel();
             self.PlotandColourGripper();
             
-            % set initial robot position and fully open gripper
+            % set initial robot position and gripper
             self.MoveRobot(self.defaultJoint);
-            self.MoveGripper(25);
+            self.MoveGripper(0);
         end
 
         %% Create the robot model

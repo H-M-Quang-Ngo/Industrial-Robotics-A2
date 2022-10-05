@@ -1,9 +1,10 @@
 clear
 close all
 
+carrot = Veggie('Carrot.ply',[0,-0.276],[255,128,0]/255);
 r = DobotMagicianwithGripper;
 hold on
-h = PlaceObject('Carrot.ply',[0,-0.276,0.02]);
+
 
 % desired joint state at final position
 qPick = [-90 45 35 -35 -90]*pi/180;
@@ -31,6 +32,7 @@ damping_coefficient_MAX = 0.05;
 
 % random collision trigger:
 checkCollision = randi([1,steps+10],1,1);
+% checkCollision = 25;
 
 count = 0;
 
@@ -41,7 +43,7 @@ count = 0;
 while error_displacement > 0.005
 
     % trace the end-effector
-    plot3(poseCurrent(1,4),poseCurrent(2,4),poseCurrent(3,4),'r.');
+    % plot3(poseCurrent(1,4),poseCurrent(2,4),poseCurrent(3,4),'r.');
 
     % check collision and try to avoid
     if count == checkCollision
@@ -52,13 +54,13 @@ while error_displacement > 0.005
             % lift the arm
             zLift = 0.2;
             T_Lift = transl(0,0,zLift)*poseCurrent;
-            RMRCMotion(r,T_Lift,40);
+            RMRCMotion(r,T_Lift,30);
 
             % move in plane xy
             xMove = 0.08;
             yMove = 0.08;
             T_xyMove = transl(-xMove,-yMove,0)*T_Lift;
-            RMRCMotion(r,T_xyMove,40);
+            RMRCMotion(r,T_xyMove,30);
         else
             disp('Cannot find way to avoid this collision. Stop the robot!');
             break;
@@ -121,3 +123,21 @@ while error_displacement > 0.005
 end
 
 disp(['Current error is ',num2str(1000* error_displacement),'mm.']);
+
+posePick_mid = r.model.fkine(r.model.getpos);
+
+%% Lower the arm to pick the object 
+
+if error_displacement <= 0.005
+    posePick = transl(0,0,-0.04)*posePick_mid;
+    
+    r.MoveGripper(25);
+    RMRCMotion(r,posePick,20);
+    r.MoveGripper(24);
+
+%% Bring it to the start position
+    RMRCMotion(r,r.model.fkine(r.defaultJoint),50,carrot)
+end
+
+
+

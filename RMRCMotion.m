@@ -1,8 +1,11 @@
-function RMRCMotion(robot,poseFinal,steps)
+%% function for manipulator's RMRC motion
+
+function RMRCMotion(robot,poseFinal,steps,object)
     % robot: robot object, which has MoveRobot method
     % qFinal: final joint state of the robot
     % steps : desired steps for the trajectory from current -> final Pose
-    
+    % object: gripped object for robot's gripper of the class 'Veggie'
+
     % safe step of time for not exceed each joint's max speed
     timestep = 0.05;
     
@@ -19,20 +22,25 @@ function RMRCMotion(robot,poseFinal,steps)
     pointFinal = poseFinal(1:3,4);
     error_displacement = norm(pointFinal - pointCurrent);
     
+    objectExist = false;
+
+    if exist('object','var') 
+        objectExist = true;
+    end
+    
     count = 0;
     
     %% track the trajectory by RRMC
     while error_displacement > 0.005
-    
+        % trace the end-effector
+        % plot3(poseCurrent(1,4),poseCurrent(2,4),poseCurrent(3,4),'r.');
+        
         % current joint state 
         qCurrent = robot.model.getpos;
         
         % manipulability and Jacobian
         mani =  robot.model.maniplty(qCurrent);
         J = robot.model.jacob0(qCurrent);
-
-        % trace the end-effector
-        plot3(poseCurrent(1,4),poseCurrent(2,4),poseCurrent(3,4),'r.');
     
         % current difference to the final position
         distanceDiff = transl(poseFinal) - transl(poseCurrent);
@@ -67,12 +75,19 @@ function RMRCMotion(robot,poseFinal,steps)
             poseNext = robot.model.fkine(qNext);
             qNext = robot.model.ikcon(poseNext,robot.model.getpos);
         end
-
-        % move robot
+        
+        % move robot 
         robot.MoveRobot(qNext);
-    
+
         % retrieve the current pose
         poseCurrent = robot.model.fkine(robot.model.getpos);
+        
+        % move the object if exists
+        if objectExist
+            object.Update(poseCurrent*robot.objectTr);
+        end
+                
+        % calculate the current error to the goal
         pointCurrent = poseCurrent(1:3,4);
         error_displacement = norm(pointFinal - pointCurrent);
     
