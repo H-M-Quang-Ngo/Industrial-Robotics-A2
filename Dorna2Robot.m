@@ -13,7 +13,10 @@ classdef Dorna2Robot < handle
         plotopts = {'fps',240,'noarrow','nowrist','noname','tile1color',[1 1 1],'floorlevel',-0.3};
                 
         %> default set of joints
-        defaultJoint = [0 -80 100 -20 0]*pi/180;
+        defaultJoint = [0 -78 102 -25 0]*pi/180;
+
+        %> Gripped object's transform (no orientation) seen by the end-effector
+        objectTr = transl(0.224,0,0.16)*rpy2tr(-2*pi,-pi/2,2*pi);
     end
 
 
