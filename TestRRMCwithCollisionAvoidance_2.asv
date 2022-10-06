@@ -211,14 +211,12 @@ for i =1:5
     % push the veggie piece towards the bowl (bottom right)
     RMRCMotion(robot2,pose_Third_Dorna,50,carrotPiece(i),adjustTr);
     
-    % veggie piece falls inside the bow
-    steps_fall = 20;
-    T = RandominBowl(carrotPiece(i).pose,steps_fall);
-
-    for j =1:steps_fall
-        carrotPiece(i).Update(T(:,:,j));
-        drawnow();
-    end
+%     % veggie piece falls inside the bow
+%     steps_fall = 20;
+%     for j =1:steps_fall
+%         carrotPiece(i).Update(T(i));
+%         drawnow()
+%     end
     
     % go back initial position(top right)
     RMRCMotion(robot2,pose_Default_Dorna,40);

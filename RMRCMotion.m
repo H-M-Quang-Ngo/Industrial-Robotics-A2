@@ -1,10 +1,11 @@
 %% function for straight line RMRC motion
 
-function RMRCMotion(robot,poseFinal,steps,object)
+function RMRCMotion(robot,poseFinal,steps,object,objectTr)
     % robot: robot object, which has MoveRobot method
     % qFinal: final joint state of the robot
     % steps : desired steps for the trajectory from current -> final Pose
     % object: gripped object for robot's gripper of the class 'Veggie'
+    % objectTr: object's transform seen by the robot
 
     % safe step of time for not exceed each joint's max speed
     timestep = 0.05;
@@ -26,6 +27,9 @@ function RMRCMotion(robot,poseFinal,steps,object)
 
     if exist('object','var') 
         objectExist = true;
+        if ~exist('objectTr','var')
+            objectTr = eye(4);
+        end
     end
     
     count = 0;
@@ -91,7 +95,7 @@ function RMRCMotion(robot,poseFinal,steps,object)
         
         % move the object if exists
         if objectExist
-            object.Update(poseCurrent*robot.objectTr);
+            object.Update(poseCurrent*objectTr);
         end
                 
         % calculate the current error to the goal
@@ -101,5 +105,5 @@ function RMRCMotion(robot,poseFinal,steps,object)
         count = count+1;
     end
     
-    disp(['Current error is ',num2str(1000* error_displacement),'mm.']);
+    % disp(['Current error is ',num2str(1000* error_displacement),'mm.']);
 end

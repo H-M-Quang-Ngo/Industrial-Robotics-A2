@@ -1,4 +1,4 @@
-% robot = Dorna2Robot;
+robot = Dorna2Robot;
 robot.model.base = transl([0.77 0 0]) * trotz(pi);
 robot.MoveRobot(robot.model.getpos);
 

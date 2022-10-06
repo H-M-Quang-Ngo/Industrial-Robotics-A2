@@ -22,10 +22,6 @@ classdef DobotMagicianwithGripper < handle
 
         %> Default set of joints
         defaultJoint  = [0,30,60,-45,0]*pi/180;
-
-        %> Gripped object's transform (no orientation) seen by the end-effector
-        objectTr = transl(0,0,-0.040);
-
     end
 
     methods (Access = public)
