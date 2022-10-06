@@ -1,7 +1,7 @@
 % clear
 % close all
 
-carrot = Veggie('Carrot.ply',transl(0,-0.276,0.02),[255,128,0]/255);
+carrot = Veggie('Carrot.ply',[0,-0.276],[255,128,0]/255);
 r = DobotMagicianwithGripper;
 
 view([34.58 27.20])
@@ -150,12 +150,11 @@ end
 %% Replace the carrot with carrot pieces
 
 carrotPose = carrot.pose;
-delete(carrot.mesh_h);
-delete(carrot);
-hold on
 
+delete(carrot.mesh_h)
 for i = 1:6
-    carrotPiece(i) = Veggie(['CarrotPiece_',num2str(i),'.ply'],carrotPose);
+    carrotPiece(i) = Veggie(['CarrotPiece_',num2str(i),'.ply'],[0,0]);
+    carrotPiece(i).Update(carrotPose)
 end
 
 

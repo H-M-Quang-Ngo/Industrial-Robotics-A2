@@ -11,7 +11,7 @@ classdef Veggie < handle
     %%
     methods
         % place the object at pos = [x y] position and specify the color [r g b]
-        function self = Veggie(fileName,position_xy,colour)
+        function self = Veggie(fileName,pose,colour)
             % get the ply file's name
             self.fileName = fileName;
             
@@ -23,11 +23,11 @@ classdef Veggie < handle
                 self.colour = [255,128,0]/255; 
 
             elseif (nargin == 2)
-                self.pose = transl(position_xy(1),position_xy(2),0.02);
+                self.pose = pose;
                 self.colour = [255,128,0]/255;
 
             else
-                self.pose = transl(position_xy(1),position_xy(2),0.02);
+                self.pose = pose;
                 self.colour = colour;
             end
             
