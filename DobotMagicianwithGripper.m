@@ -14,11 +14,11 @@ classdef DobotMagicianwithGripper < handle
         name = 'DobotMagicianwithGripper';
 
         %> Workspace
-        workspace = [-2 2 -2 2 -0.55 2];
+        workspace = [-1 2 -2 2 -1.5 2];
 
         %> Options to display robot
         plotopts = {'fps',240,'noarrow','nowrist','noname',...
-            'tile1color',[1 1 1],'floorlevel',-0.55};
+            'tile1color',[1 1 1],'floorlevel',-1.5};
 
         %> Default set of joints
         defaultJoint  = [0,30,60,-45,0]*pi/180;

@@ -52,7 +52,7 @@ function RMRCMotion(robot,poseFinal,steps,object)
         
         % reduce singularity if exists
         if mani < mani_threshold
-            damping_coefficient = (1-(mani/manithreshold)^2)/damping_coefficient_MAX;
+            damping_coefficient = (1-(mani/mani_threshold)^2)/damping_coefficient_MAX;
             J_DLS = J'/(J*J'+ damping_coefficient*eye(6));    % damped least square Jacobian
             
             % joint velocity

@@ -1,5 +1,5 @@
-clear
-close all
+% clear
+% close all
 
 carrot = Veggie('Carrot.ply',[0,-0.276],[255,128,0]/255);
 r = DobotMagicianwithGripper;
@@ -31,11 +31,11 @@ damping_coefficient_MAX = 0.05;
 
 
 % random collision trigger:
-checkCollision = randi([1,steps+10],1,1);
-% checkCollision = 25;
+%checkCollision = randi([1,steps+10],1,1);
+checkCollision = 25;
 
 count = 0;
-
+pause();
 %% track the trajectory by RRMC
 % the closer the obstacle to the target, the less accurate of the
 % avoidance
@@ -136,7 +136,8 @@ if error_displacement <= 0.005
     r.MoveGripper(24);
 
 %% Bring it to the start position
-    RMRCMotion(r,r.model.fkine(r.defaultJoint),50,carrot)
+    RMRCMotion(r,posePick_mid,50,carrot);
+    RMRCMotion(r,r.model.fkine(r.defaultJoint),50,carrot);
 end
 
 
