@@ -45,6 +45,8 @@ function CreateEnvironment(~)
     PlaceObject("Env_Shiled.ply", [ 1.15 0.05 0.25 ]);
     PlaceObject("Env_Controller1.ply", [ -0.1 -1.5 -0.25]);
     PlaceObject("Env_Controller2.ply", [ 0.1 -1.5 -0.25]);
+    PlaceObject("Env_LightCurtain.ply", [ 0.1 0.1 -0.08]);
+    PlaceObject("Env_LightCurtain.ply", [ 0.1 -1 -0.08]);
     camlight
     lighting flat
 end
