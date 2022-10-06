@@ -1,4 +1,4 @@
-%% function for manipulator's RMRC motion
+%% function for straight line RMRC motion
 
 function RMRCMotion(robot,poseFinal,steps,object)
     % robot: robot object, which has MoveRobot method
@@ -31,7 +31,7 @@ function RMRCMotion(robot,poseFinal,steps,object)
     count = 0;
     
     %% track the trajectory by RRMC
-    while error_displacement > 0.005
+    while error_displacement > 0.003
         % trace the end-effector
         % plot3(poseCurrent(1,4),poseCurrent(2,4),poseCurrent(3,4),'r.');
         
@@ -45,7 +45,14 @@ function RMRCMotion(robot,poseFinal,steps,object)
         % current difference to the final position
         distanceDiff = transl(poseFinal) - transl(poseCurrent);
         angleDiff = tr2rpy(poseFinal) - tr2rpy(poseCurrent);
-    
+        
+        % disallow the angular difference > pi:
+        for i =1:3
+            if abs(angleDiff(i)) >= 3.14
+                angleDiff(i) = 0;
+            end
+        end
+
         % desired spatial velocity
         u = (distanceDiff/(steps-count))/timestep;
         omega = (angleDiff/(steps-count))/timestep;
@@ -94,5 +101,5 @@ function RMRCMotion(robot,poseFinal,steps,object)
         count = count+1;
     end
     
-    % disp(['Current error is ',num2str(1000* error_displacement),'mm.']);
+    disp(['Current error is ',num2str(1000* error_displacement),'mm.']);
 end

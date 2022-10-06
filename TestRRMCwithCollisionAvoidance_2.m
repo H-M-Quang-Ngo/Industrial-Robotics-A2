@@ -39,7 +39,7 @@ damping_coefficient_MAX = 0.05;
 
 % random collision trigger:
 %checkCollision = randi([1,steps+10],1,1);
-checkCollision = 60;
+checkCollision = 24;
 
 count = 0;
 pause();
@@ -47,7 +47,7 @@ pause();
 % the closer the obstacle to the target, the less accurate of the
 % avoidance
 
-while error_displacement > 0.005
+while error_displacement > 0.003
 
     % trace the end-effector
     % plot3(poseCurrent(1,4),poseCurrent(2,4),poseCurrent(3,4),'r.');
@@ -135,7 +135,7 @@ posePick_mid = r.model.fkine(r.model.getpos);
 
 %% Lower the arm to pick the object 
 
-if error_displacement <= 0.005
+if error_displacement <= 0.003
     posePick = transl(0,0,-0.04)*posePick_mid;
     
     r.MoveGripper(25);
@@ -143,7 +143,7 @@ if error_displacement <= 0.005
     r.MoveGripper(24);
 
 %% Bring it to the start position
-    RMRCMotion(r,posePick_mid,50,carrot);
+    RMRCMotion(r,posePick_mid,20,carrot);
     RMRCMotion(r,r.model.fkine(r.defaultJoint),50,carrot);
 end
 
