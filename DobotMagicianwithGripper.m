@@ -21,7 +21,7 @@ classdef DobotMagicianwithGripper < handle
             'tile1color',[1 1 1],'floorlevel',-1.5};
 
         %> Default set of joints
-        defaultJoint  = [0,30,60,-45,0]*pi/180;
+        jointDefault  = [0,30,60,-45,0]*pi/180;
     end
 
     methods (Access = public)
@@ -34,7 +34,7 @@ classdef DobotMagicianwithGripper < handle
             self.PlotandColourGripper();
             
             % set initial robot position and gripper
-            self.MoveRobot(self.defaultJoint);
+            self.MoveRobot(self.jointDefault);
             self.MoveGripper(0);
         end
 
@@ -217,7 +217,7 @@ classdef DobotMagicianwithGripper < handle
         %% Test the movement of robot and gripper
         function TestMovement(self)
             qTest = rand(1,5);
-            qTrajectory = jtraj(self.defaultJoint,qTest,50);
+            qTrajectory = jtraj(self.jointDefault,qTest,50);
 
             for i = 1:50
                 self.MoveRobot(qTrajectory(i,:));

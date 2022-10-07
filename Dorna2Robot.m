@@ -14,7 +14,7 @@ classdef Dorna2Robot < handle
             'tile1color',[1 1 1],'floorlevel',-1.5};
                 
         %> default set of joints
-        defaultJoint = [0 -78 102 -25 0]*pi/180;
+        jointDefault = [0 -78 102 -25 0]*pi/180;
     end
 
 
@@ -23,7 +23,7 @@ classdef Dorna2Robot < handle
         function self = Dorna2Robot()
             self.CreateModel();
             self.PlotAndColourRobot();
-            self.model.animate(self.defaultJoint)
+            self.model.animate(self.jointDefault)
         end
 
         %% Model Robot's DH Parameters
@@ -83,7 +83,7 @@ classdef Dorna2Robot < handle
         %% Test the movement of robot
         function TestMovement(self)
             qTest = rand(1,5);
-            qTrajectory = jtraj(self.defaultJoint,qTest,100);
+            qTrajectory = jtraj(self.jointDefault,qTest,100);
             self.MoveRobot(qTrajectory);
         end
     end

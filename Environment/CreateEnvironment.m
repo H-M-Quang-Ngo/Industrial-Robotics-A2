@@ -22,7 +22,7 @@ function CreateEnvironment(~)
     PlaceObject("Env_Bowl1.ply", [ 0 0 -0.013]);
     PlaceObject("Env_FoodTray.ply", [ -0.03 -0.03 -0.55]);
     PlaceObject("Env_Base.ply", [ 0 0 -0.55]);
-    PlaceObject("Env_Base2.ply", [ 0 0 -0.55]);
+    PlaceObject("Env_Base2.ply", [ 0.1 0 -0.55]);
     PlaceObject("Env_Model1.ply", [ 1 -1.4 -0.85]);
     PlaceObject("Env_Wall.ply", [ -1 -0.5 2]);
     PlaceObject("Env_FamilyTable.ply", [ 3.5 -2 -0.7]);

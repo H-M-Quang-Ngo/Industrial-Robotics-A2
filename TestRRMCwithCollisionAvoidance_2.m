@@ -18,7 +18,11 @@ ylim([-2.14 1.35])
 zlim([-0.05 2.36])
 view([17.70 24.49])
 
-% desired joint state at final position
+% default poses of the two robot
+pose_Default_Dobot = robot1.model.fkine(robot1.jointDefault);
+pose_Default_Dorna = robot2.model.fkine(robot2.jointDefault);
+
+% desired joint state for the dobot at the upper picking position
 qPick_dobot = [-90 45 35 -35 -90]*pi/180;
 
 % required initial and final pose
@@ -44,12 +48,12 @@ damping_coefficient_MAX = 0.05;
 
 % random collision trigger:
 %checkCollision = randi([1,steps+10],1,1);
-checkCollision = 24;
+checkCollision = 10;
 
 count = 0;
 pause();
 
-%% Dobot tracks the trajectory by RRMC
+%% Dobot tracks the trajectory by RRMC to reach the veggie
 % the closer the obstacle to the target, the less accurate of the
 % avoidance
 
@@ -151,9 +155,10 @@ if error_displacement_dobot <= 0.003
     RMRCMotion(robot1,posePick,20);
     robot1.MoveGripper(24);
 
-%% Bring it to the chopping position
+    % Bring it to the chopping position
     RMRCMotion(robot1,posePick_mid_dobot,20,carrot,objectTr_Dobot);
-    RMRCMotion(robot1,robot1.model.fkine(robot1.defaultJoint),50,carrot,objectTr_Dobot);
+    RMRCMotion(robot1,transl(0,0,0.04)*pose_Default_Dobot,50,carrot,objectTr_Dobot);
+    RMRCMotion(robot1,pose_Default_Dobot,20,carrot,objectTr_Dobot);
 end
 
 %% Replace the carrot with carrot pieces
@@ -169,7 +174,7 @@ end
 
 %% Dorna 2 joins
 
-%> Gripped object's transform (no orientation) seen by the Dorna's end-effector
+% Gripped object's transform seen by the Dorna's end-effector
 objectTr_Dorna = transl(0.228,0,0.155)*rpy2tr(-2*pi,-pi/2,2*pi);
 
 pose_First_Dorna = nan(4,4,5);
@@ -178,7 +183,7 @@ pose_Second_Dorna = nan(4,4,5);
 q_First_Dorna =   [0,-61,82,-20,0] * pi/180;
 
 % top right corner
-pose_Default_Dorna = robot2.model.fkine(robot2.defaultJoint);
+% pose_Default_Dorna = robot2.model.fkine(robot2.jointDefault);
 
 % top left corner
 pose_First_Dorna(:,:,1) = robot2.model.fkine(q_First_Dorna);
@@ -212,16 +217,41 @@ for i =1:5
     RMRCMotion(robot2,pose_Third_Dorna,50,carrotPiece(i),adjustTr);
     
     % veggie piece falls inside the bow
-    steps_fall = 20;
-    T = RandominBowl(carrotPiece(i).pose,steps_fall);
-
-    for j =1:steps_fall
-        carrotPiece(i).Update(T(:,:,j));
-        drawnow();
-    end
+    RandominBowl(carrotPiece(i));
     
     % go back initial position(top right)
     RMRCMotion(robot2,pose_Default_Dorna,40);
 end
 
+%% Dobot bring the final piece closer
+
+% lift it up
+RMRCMotion(robot1,transl(0,0,0.04)*pose_Default_Dobot,20,carrotPiece(6),objectTr_Dobot);
+
+% place it down
+RMRCMotion(robot1,transl(0.1,0,0)*pose_Default_Dobot,20,carrotPiece(6),objectTr_Dobot);
+robot1.MoveGripper(25);
+
+% back to the default position
+RMRCMotion(robot1,pose_Default_Dobot,40);
+robot1.MoveGripper(0);
+
+%% Dorna push the final piece down
+
+% how the Dorna see the final piece
+adjustTr_final = transl(0,0,-(slice+0.004)*6)*objectTr_Dorna;
+
+% top left 
+RMRCMotion(robot2,transl(-0.1,0,0)*pose_Default_Dorna,50);
+
+% bottom left
+RMRCMotion(robot2,transl(-0.1,0,-0.06)*pose_Default_Dorna,50);
+
+% bottom right
+RMRCMotion(robot2,pose_Third_Dorna,50,carrotPiece(6),adjustTr_final);
+
+RandominBowl(carrotPiece(6));
+
+% back to default position
+RMRCMotion(robot2,pose_Default_Dorna,100);
 
