@@ -48,7 +48,7 @@ damping_coefficient_MAX = 0.05;
 
 % random collision trigger:
 %checkCollision = randi([1,steps+10],1,1);
-checkCollision = 10;
+checkCollision = 60;
 
 count = 0;
 pause();

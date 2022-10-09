@@ -1,10 +1,35 @@
 clear
 % close all
 
-carrot = Veggie('Carrot.ply',transl(0,-0.276,0.02),[255,128,0]/255);
-robot1 = DobotMagicianwithGripper;
+% create the environment
+CreateEnvironment();
 
+% type of the veggie to cut
+veggie_Type = 'Cucumber';
+
+switch veggie_Type
+    case 'Carrot'
+        veggie_Color = [255,128,0]/255;
+
+        % initial position above the veggie
+        veggie_Pose = transl(0,-0.276,0.02);
+
+        % desired joint state for the dobot at the upper picking position
+        qPick_Dobot = [-90 45 35 -35 -90]*pi/180;
+
+    case 'Cucumber'
+        veggie_Color = [30,170,30]/255;
+        veggie_Pose = transl(0.01,-0.23,0.02);
+        qPick_Dobot = [-88.86 30.197 60.7302 -45.93 -90]*pi/180;
+end
+
+veggie = Veggie([veggie_Type,'.ply'],veggie_Pose,veggie_Color);
+
+% call the two robots
+robot1 = DobotMagicianwithGripper;
 robot2 = Dorna2Robot;
+
+% adjust the initial position of the Dorna
 robot2.model.base = transl([0.77 0 0]) * trotz(pi);
 robot2.MoveRobot(robot2.model.getpos);
 
@@ -18,16 +43,17 @@ ylim([-2.14 1.35])
 zlim([-0.05 2.36])
 view([17.70 24.49])
 
-% desired joint state at final position
-qPick_dobot = [-90 45 35 -35 -90]*pi/180;
+% default poses of the two robot
+pose_Default_Dobot = robot1.model.fkine(robot1.jointDefault);
+pose_Default_Dorna = robot2.model.fkine(robot2.jointDefault);
 
-% required initial and final pose
-poseCurrent_dobot = robot1.model.fkine(robot1.model.getpos);
-poseFinal_dobot = robot1.model.fkine(qPick_dobot);
+% required initial and the pose above the veggie
+poseCurrent_Dobot = robot1.model.fkine(robot1.model.getpos);
+poseAboveVeggie_Dobot = robot1.model.fkine(qPick_Dobot);
 
-pointCurrent_dobot = poseCurrent_dobot(1:3,4);
-pointFinal_dobot = poseFinal_dobot(1:3,4);
-error_displacement_dobot = norm(pointFinal_dobot - pointCurrent_dobot);
+pointCurrent_Dobot = poseCurrent_Dobot(1:3,4);
+pointFinal_Dobot = poseAboveVeggie_Dobot(1:3,4);
+error_displacement_dobot = norm(pointFinal_Dobot - pointCurrent_Dobot);
 
 % number of desired steps from initial position to final position
 steps = 50;
@@ -39,17 +65,17 @@ timestep = 0.05;
 mani_threshold = 0.0044;
 
 % max damping coefficient 
-damping_coefficient_MAX = 0.05;
+damping_coefficient_MAX = 0.5;
 
 
 % random collision trigger:
 %checkCollision = randi([1,steps+10],1,1);
-checkCollision = 24;
+checkCollision = 60;
 
 count = 0;
 pause();
 
-%% Dobot tracks the trajectory by RRMC
+%% Dobot tracks the trajectory by RRMC to reach the veggie
 % the closer the obstacle to the target, the less accurate of the
 % avoidance
 
@@ -66,7 +92,7 @@ while error_displacement_dobot > 0.003
         if (count/steps) < 3/5
             % lift the arm
             zLift = 0.2;
-            T_Lift = transl(0,0,zLift)*poseCurrent_dobot;
+            T_Lift = transl(0,0,zLift)*poseCurrent_Dobot;
             RMRCMotion(robot1,T_Lift,30);
 
             % move in plane xy
@@ -88,11 +114,11 @@ while error_displacement_dobot > 0.003
     J = robot1.model.jacob0(qCurrent);
  
     % retrieve the current pose
-    poseCurrent_dobot = robot1.model.fkine(qCurrent);
+    poseCurrent_Dobot = robot1.model.fkine(qCurrent);
 
     % current difference to the final position
-    distanceDiff = transl(poseFinal_dobot) - transl(poseCurrent_dobot);
-    angleDiff = tr2rpy(poseFinal_dobot) - tr2rpy(poseCurrent_dobot);
+    distanceDiff = transl(poseAboveVeggie_Dobot) - transl(poseCurrent_Dobot);
+    angleDiff = tr2rpy(poseAboveVeggie_Dobot) - tr2rpy(poseCurrent_Dobot);
 
     % desired spatial velocity
     u = (distanceDiff/(steps-count))/timestep;
@@ -100,7 +126,7 @@ while error_displacement_dobot > 0.003
 
     % reduce singularity if exists
     if mani < mani_threshold
-        damping_coefficient = (1-(mani/manithreshold)^2)/damping_coefficient_MAX;
+        damping_coefficient = (1-(mani/mani_threshold)^2)/damping_coefficient_MAX;
         J_DLS = J'/(J*J'+ damping_coefficient*eye(6));    % damped least square Jacobian
         
         % joint velocity
@@ -128,16 +154,16 @@ while error_displacement_dobot > 0.003
     robot1.MoveRobot(qNext);
 
     % retrieve the current pose
-    poseCurrent_dobot = robot1.model.fkine(robot1.model.getpos);
-    pointCurrent_dobot = poseCurrent_dobot(1:3,4);
-    error_displacement_dobot = norm(pointFinal_dobot - pointCurrent_dobot);
+    poseCurrent_Dobot = robot1.model.fkine(robot1.model.getpos);
+    pointCurrent_Dobot = poseCurrent_Dobot(1:3,4);
+    error_displacement_dobot = norm(pointFinal_Dobot - pointCurrent_Dobot);
 
     count = count+1;
 end
 
 disp(['Current error is ',num2str(1000* error_displacement_dobot),'mm.']);
 
-posePick_mid_dobot = robot1.model.fkine(robot1.model.getpos);
+
 
 %% Lower the arm to pick the object 
 
@@ -145,31 +171,38 @@ posePick_mid_dobot = robot1.model.fkine(robot1.model.getpos);
 objectTr_Dobot = transl(0,0,-0.040);
 
 if error_displacement_dobot <= 0.003
-    posePick = transl(0,0,-0.04)*posePick_mid_dobot;
+    posePick = transl(0,0,-0.04)*poseAboveVeggie_Dobot;
     
     robot1.MoveGripper(25);
     RMRCMotion(robot1,posePick,20);
     robot1.MoveGripper(24);
 
-%% Bring it to the chopping position
-    RMRCMotion(robot1,posePick_mid_dobot,20,carrot,objectTr_Dobot);
-    RMRCMotion(robot1,robot1.model.fkine(robot1.defaultJoint),50,carrot,objectTr_Dobot);
+    % Bring the veggie to the chopping position
+
+    % lift it up
+    RMRCMotion(robot1,poseAboveVeggie_Dobot,20,veggie,objectTr_Dobot);
+
+    % rotate the waist to the cutting board
+    RMRCMotion(robot1,transl(0,0,0.04)*pose_Default_Dobot,50,veggie,objectTr_Dobot);
+
+    % lower it down
+    RMRCMotion(robot1,pose_Default_Dobot,20,veggie,objectTr_Dobot);
 end
 
-%% Replace the carrot with carrot pieces
+%% Replace the veggie with veggie pieces
 
-carrotPose = carrot.pose;
-delete(carrot.mesh_h);
-delete(carrot);
+veggiePose_current = veggie.pose;
+delete(veggie.mesh_h);
+delete(veggie);
 hold on
 
 for i = 1:6
-    carrotPiece(i) = Veggie(['CarrotPiece_',num2str(i),'.ply'],carrotPose);
+    veggiePiece(i) = Veggie([veggie_Type,'Piece_',num2str(i),'.ply'],veggiePose_current,veggie_Color);
 end
 
 %% Dorna 2 joins
 
-%> Gripped object's transform (no orientation) seen by the Dorna's end-effector
+% Gripped object's transform seen by the Dorna's end-effector
 objectTr_Dorna = transl(0.228,0,0.155)*rpy2tr(-2*pi,-pi/2,2*pi);
 
 pose_First_Dorna = nan(4,4,5);
@@ -178,7 +211,7 @@ pose_Second_Dorna = nan(4,4,5);
 q_First_Dorna =   [0,-61,82,-20,0] * pi/180;
 
 % top right corner
-pose_Default_Dorna = robot2.model.fkine(robot2.defaultJoint);
+% pose_Default_Dorna = robot2.model.fkine(robot2.jointDefault);
 
 % top left corner
 pose_First_Dorna(:,:,1) = robot2.model.fkine(q_First_Dorna);
@@ -209,17 +242,44 @@ for i =1:5
     % adjust the transform of each veggie piece
     adjustTr = transl(0,0,-(slice+0.005)*(i-1))*objectTr_Dorna;
     % push the veggie piece towards the bowl (bottom right)
-    RMRCMotion(robot2,pose_Third_Dorna,50,carrotPiece(i),adjustTr);
+    RMRCMotion(robot2,pose_Third_Dorna,50,veggiePiece(i),adjustTr);
     
-%     % veggie piece falls inside the bow
-%     steps_fall = 20;
-%     for j =1:steps_fall
-%         carrotPiece(i).Update(T(i));
-%         drawnow()
-%     end
+    % veggie piece falls inside the bow
+    RandominBowl(veggiePiece(i));
     
     % go back initial position(top right)
     RMRCMotion(robot2,pose_Default_Dorna,40);
 end
 
+%% Dobot bring the final piece closer
+
+% lift it up
+RMRCMotion(robot1,transl(0,0,0.04)*pose_Default_Dobot,20,veggiePiece(6),objectTr_Dobot);
+
+% place it down
+RMRCMotion(robot1,transl(0.1,0,0)*pose_Default_Dobot,20,veggiePiece(6),objectTr_Dobot);
+robot1.MoveGripper(25);
+
+% back to the default position
+RMRCMotion(robot1,pose_Default_Dobot,40);
+robot1.MoveGripper(0);
+
+%% Dorna push the final piece down
+
+% how the Dorna see the final piece
+adjustTr_final = transl(0,0,-(slice+0.006)*6)*objectTr_Dorna;
+
+% top left 
+RMRCMotion(robot2,transl(-0.1,0,0)*pose_Default_Dorna,50);
+
+% bottom left
+RMRCMotion(robot2,transl(-0.1,0,-0.06)*pose_Default_Dorna,50);
+
+% bottom right
+RMRCMotion(robot2,pose_Third_Dorna,50,veggiePiece(6),adjustTr_final);
+
+RandominBowl(veggiePiece(6));
+
+% back to default position
+RMRCMotion(robot2,pose_Default_Dorna,100);
 

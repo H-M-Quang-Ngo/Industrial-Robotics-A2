@@ -4,7 +4,7 @@
 function RandominBowl(veggiePiece)
     steps = 20;
     
-    x = 0.08 + rand(100,1)*(0.5-0.45)-0.025;
+    x = 0.07 + rand(100,1)*(0.5-0.45)-0.027;
     y = rand(100,1)*(0.06+0.06)-0.055; 
     z = 0.05 + rand(100,1)*0.02;
 %   rpy = rand(1,3);

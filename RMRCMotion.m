@@ -14,7 +14,7 @@ function RMRCMotion(robot,poseFinal,steps,object,objectTr)
     mani_threshold = 0.0044;
 
     % max damping coefficient 
-    damping_coefficient_MAX = 0.05;
+    damping_coefficient_MAX = 0.5;
 
     % get initial pose
     poseCurrent = robot.model.fkine(robot.model.getpos);
