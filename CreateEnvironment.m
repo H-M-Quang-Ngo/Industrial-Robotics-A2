@@ -20,7 +20,7 @@ function CreateEnvironment(~)
     PlaceObject("Env_CuttingBoard.ply", [ 0.002 0 -0.56 ]);
     PlaceObject("Env_SupportPillar.ply", [0.3 0 -0.56]);
     PlaceObject("Env_Bowl1.ply", [ 0 0 -0.013]);
-    PlaceObject("Env_FoodTray.ply", [ -0.03 -0.03 -0.55]);
+    PlaceObject("Env_FoodTray.ply", [ -0.03 -0.045 -0.55]);
     PlaceObject("Env_Base.ply", [ 0 0 -0.55]);
     PlaceObject("Env_Base2.ply", [ 0.1 0 -0.55]);
     PlaceObject("Env_Model1.ply", [ 1 -1.4 -0.85]);
@@ -47,6 +47,10 @@ function CreateEnvironment(~)
     PlaceObject("Env_Controller2.ply", [ 0.1 -1.5 -0.25]);
     PlaceObject("Env_LightCurtain.ply", [ 0.1 0.1 -0.08]);
     PlaceObject("Env_LightCurtain.ply", [ 0.1 -1 -0.08]);
+    
+    carrotColor = [255,128,0]/255;
+    
+    Veggie('Carrot.ply',transl(0.03,-0.32,0.02),carrotColor);
+    
     camlight
-    lighting flat
 end
