@@ -1,9 +1,10 @@
 %% function for straight line RMRC motion
 
-function RMRCMotion(robot,poseFinal,steps,object,objectTr)
+function RMRCMotion(robot,poseFinal,steps,speedMax,object,objectTr)
     % robot: robot object, which has MoveRobot method
     % qFinal: final joint state of the robot
     % steps : desired steps for the trajectory from current -> final Pose
+    % maxspeed: minimum Max speed among the joints
     % object: gripped object for robot's gripper of the class 'Veggie'
     % objectTr: object's transform seen by the robot
 
@@ -41,10 +42,6 @@ function RMRCMotion(robot,poseFinal,steps,object,objectTr)
         
         % current joint state 
         qCurrent = robot.model.getpos;
-        
-        % manipulability and Jacobian
-        mani =  robot.model.maniplty(qCurrent);
-        J = robot.model.jacob0(qCurrent);
     
         % current difference to the final position
         distanceDiff = transl(poseFinal) - transl(poseCurrent);
@@ -60,23 +57,30 @@ function RMRCMotion(robot,poseFinal,steps,object,objectTr)
         % desired spatial velocity
         u = (distanceDiff/(steps-count))/timestep;
         omega = (angleDiff/(steps-count))/timestep;
-        
-        % reduce singularity if exists
-        if mani < mani_threshold
-            damping_coefficient = (1-(mani/mani_threshold)^2)/damping_coefficient_MAX;
-            J_DLS = J'/(J*J'+ damping_coefficient*eye(6));    % damped least square Jacobian
-            
-            % joint velocity
-            qd = J_DLS * [u; omega'];
-        else
-            % joint velocity
-            qd = pinv(J) * [u; omega'];
-        end
+
+        % Jacobian and manipulability
+        J = robot.model.jacob0(qCurrent);
+        mani =  robot.model.maniplty(qCurrent);
+
+        % joint velocity
+        qd = pinv(J) * [u; omega'];
 
         % next position
         qNext = qCurrent + qd'*timestep;
         
-        % check the validity of 'qNext':
+        % reduce singularity if exists
+        if (mani < mani_threshold)
+            damping_coefficient = (1-(mani/mani_threshold)^2)*damping_coefficient_MAX;
+            J_DLS = J'/(J*J'+ damping_coefficient*eye(6));    % damped least square Jacobian
+            
+            disp("RMRC DLS applied!");
+
+            % joint velocity & next joint state after DLS
+            qd = J_DLS * [u; omega'];
+            qNext = qCurrent + qd'*timestep; 
+        end
+
+        % check whether 'qNext' includes off-limit joint:
         checkLimit = CheckJointLimit(robot.model,qNext);
         if  checkLimit <= robot.model.n
             disp(['RMRC step ',num2str(count),'. Warning: exceed joint limit at joint ', num2str(checkLimit), ...
@@ -84,9 +88,21 @@ function RMRCMotion(robot,poseFinal,steps,object,objectTr)
     
             % replace the invalid 'qNext' by an IK solution:
             poseNext = robot.model.fkine(qNext);
-            qNext = robot.model.ikcon(poseNext,robot.model.getpos);
+            qNext = robot.model.ikcon(poseNext,qCurrent);
+
+            % get the required velocity
+            qd = (qNext - qCurrent)/timestep;
         end
         
+        % scale the velocity if any joint exceed max speed
+        [~,scale]= ScaleJointSpeed(qd,speedMax);
+        
+        if scale
+            disp(['RMRC step ',num2str(count),', velocity is scale down ',num2str(scale)]);
+        end
+        
+        % qNext = qd * (timestep*scale); 
+
         % move robot 
         robot.MoveRobot(qNext);
 
