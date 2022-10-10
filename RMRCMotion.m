@@ -36,7 +36,7 @@ function RMRCMotion(robot,poseFinal,steps,speedMax,object,objectTr)
     count = 0;
     
     %% track the trajectory by RRMC
-    while error_displacement > 0.003
+    while error_displacement > 0.005
         % trace the end-effector
         % plot3(poseCurrent(1,4),poseCurrent(2,4),poseCurrent(3,4),'r.');
         
@@ -64,9 +64,6 @@ function RMRCMotion(robot,poseFinal,steps,speedMax,object,objectTr)
 
         % joint velocity
         qd = pinv(J) * [u; omega'];
-
-        % next position
-        qNext = qCurrent + qd'*timestep;
         
         % reduce singularity if exists
         if (mani < mani_threshold)
@@ -75,10 +72,12 @@ function RMRCMotion(robot,poseFinal,steps,speedMax,object,objectTr)
             
             disp("RMRC DLS applied!");
 
-            % joint velocity & next joint state after DLS
+            % joint velocity after DLS
             qd = J_DLS * [u; omega'];
-            qNext = qCurrent + qd'*timestep; 
         end
+
+        % next position
+        qNext = qCurrent + qd'*timestep;
 
         % check whether 'qNext' includes off-limit joint:
         checkLimit = CheckJointLimit(robot.model,qNext);
