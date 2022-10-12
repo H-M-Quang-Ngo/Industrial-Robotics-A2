@@ -15,15 +15,21 @@ classdef Dorna2Robot < handle
                 
         %> default set of joints
         jointDefault = [0 -78 102 -25 0]*pi/180;
+        jointDefault2 = [0 -78 102 65 180]*pi/180;
     end
 
 
     methods
         %% Define Robot Function
-        function self = Dorna2Robot()
+        function self = Dorna2Robot(option)
             self.CreateModel();
             self.PlotAndColourRobot();
-            self.model.animate(self.jointDefault)
+            
+            if nargin == 0
+                self.model.animate(self.jointDefault)
+            elseif option == 2
+                self.model.animate(self.jointDefault2)
+            end
         end
 
         %% Model Robot's DH Parameters
