@@ -5,7 +5,7 @@ clear
 CreateEnvironment();
 
 % type of the veggie to cut
-veggie_Type = 'Carrot';
+veggie_Type = 'Cucumber';
 
 switch veggie_Type
     case 'Carrot'
@@ -74,7 +74,7 @@ damping_coefficient_MAX = 0.5;
 
 % random collision trigger:
 %checkCollision = randi([1,steps+10],1,1);
-checkCollision = 29;
+checkCollision = 14;
 
 count = 0;
 pause();
