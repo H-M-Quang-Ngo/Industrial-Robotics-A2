@@ -1,9 +1,6 @@
 function CreateEnvironment(~)
-    close all
-    clear;
-    hold on
     axis ([-1 6 -3 2.8 -1 3])
-    grid on
+%   grid on
     xlabel ('X');
     ylabel ('Y');
     zlabel ('Z');

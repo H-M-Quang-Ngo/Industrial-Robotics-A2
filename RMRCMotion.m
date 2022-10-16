@@ -1,5 +1,4 @@
 %% function for straight line RMRC motion
-
 function RMRCMotion(robot,poseFinal,steps,speedMax,object,objectTr)
     % robot: robot object, which has MoveRobot method
     % qFinal: final joint state of the robot
@@ -61,7 +60,7 @@ function RMRCMotion(robot,poseFinal,steps,speedMax,object,objectTr)
         % Jacobian and manipulability
         J = robot.model.jacob0(qCurrent);
         mani =  robot.model.maniplty(qCurrent);
-
+        
         % joint velocity
         qd = pinv(J) * [u; omega'];
         
@@ -101,6 +100,15 @@ function RMRCMotion(robot,poseFinal,steps,speedMax,object,objectTr)
         end
         
         % qNext = qd * (timestep*scale); 
+        
+        % check for E-stop and Resume pressed:
+        if evalin( 'caller', 'exist(''Estop_pushed'',''var'') == 1' )
+            while(1)
+                if evalin( 'caller', 'exist(''Resume_pushed'',''var'') == 1' )
+                    break;
+                end
+            end
+        end
 
         % move robot 
         robot.MoveRobot(qNext);
