@@ -8,6 +8,10 @@ robot2 = Dorna2Robot;
 robot2.model.base = transl([0.77 0 0]) * trotz(pi);
 robot2.MoveRobot(robot2.model.getpos);
 
+% minimum max speed of the two robot
+speedMax_Dobot = deg2rad(320);
+speedMax_Dorna = deg2rad(450);
+
 %%  Set up for Dobot
 view([34.58 27.20])
 
@@ -48,7 +52,7 @@ damping_coefficient_MAX = 0.05;
 
 % random collision trigger:
 %checkCollision = randi([1,steps+10],1,1);
-checkCollision = 60;
+checkCollision = 8;
 
 count = 0;
 pause();
@@ -69,15 +73,15 @@ while error_displacement_dobot > 0.003
         % try to avoid that collision if possible
         if (count/steps) < 3/5
             % lift the arm
-            zLift = 0.2;
+            zLift = 0.20;
             T_Lift = transl(0,0,zLift)*poseCurrent_dobot;
-            RMRCMotion(robot1,T_Lift,30);
+            RMRCMotion(robot1,T_Lift,30,speedMax_Dobot);
 
             % move in plane xy
             xMove = 0.08;
             yMove = 0.08;
             T_xyMove = transl(-xMove,-yMove,0)*T_Lift;
-            RMRCMotion(robot1,T_xyMove,30);
+            RMRCMotion(robot1,T_xyMove,30,speedMax_Dobot);
         else
             disp('Cannot find way to avoid this collision. Stop the robot!');
             break;
@@ -152,13 +156,13 @@ if error_displacement_dobot <= 0.003
     posePick = transl(0,0,-0.04)*posePick_mid_dobot;
     
     robot1.MoveGripper(25);
-    RMRCMotion(robot1,posePick,20);
+    RMRCMotion(robot1,posePick,20,speedMax_Dobot);
     robot1.MoveGripper(24);
 
     % Bring it to the chopping position
-    RMRCMotion(robot1,posePick_mid_dobot,20,carrot,objectTr_Dobot);
-    RMRCMotion(robot1,transl(0,0,0.04)*pose_Default_Dobot,50,carrot,objectTr_Dobot);
-    RMRCMotion(robot1,pose_Default_Dobot,20,carrot,objectTr_Dobot);
+    RMRCMotion(robot1,posePick_mid_dobot,20,speedMax_Dobot,carrot,objectTr_Dobot);
+    RMRCMotion(robot1,transl(0,0,0.04)*pose_Default_Dobot,50,speedMax_Dobot,carrot,objectTr_Dobot);
+    RMRCMotion(robot1,pose_Default_Dobot,20,speedMax_Dobot,carrot,objectTr_Dobot);
 end
 
 %% Replace the carrot with carrot pieces
@@ -206,34 +210,34 @@ end
 % cutting operation
 for i =1:5
     % reach the top left
-    RMRCMotion(robot2,pose_First_Dorna(:,:,i),40);
+    RMRCMotion(robot2,pose_First_Dorna(:,:,i),40,speedMax_Dorna);
 
     % chop down (bottom left)
-    RMRCMotion(robot2,pose_Second_Dorna(:,:,i),40);
+    RMRCMotion(robot2,pose_Second_Dorna(:,:,i),40,speedMax_Dorna);
 
     % adjust the transform of each veggie piece
     adjustTr = transl(0,0,-(slice+0.005)*(i-1))*objectTr_Dorna;
     % push the veggie piece towards the bowl (bottom right)
-    RMRCMotion(robot2,pose_Third_Dorna,50,carrotPiece(i),adjustTr);
+    RMRCMotion(robot2,pose_Third_Dorna,50,speedMax_Dorna,carrotPiece(i),adjustTr);
     
     % veggie piece falls inside the bow
     RandominBowl(carrotPiece(i));
     
     % go back initial position(top right)
-    RMRCMotion(robot2,pose_Default_Dorna,40);
+    RMRCMotion(robot2,pose_Default_Dorna,40,speedMax_Dorna);
 end
 
 %% Dobot bring the final piece closer
 
 % lift it up
-RMRCMotion(robot1,transl(0,0,0.04)*pose_Default_Dobot,20,carrotPiece(6),objectTr_Dobot);
+RMRCMotion(robot1,transl(0,0,0.04)*pose_Default_Dobot,20,speedMax_Dobot,carrotPiece(6),objectTr_Dobot);
 
 % place it down
-RMRCMotion(robot1,transl(0.1,0,0)*pose_Default_Dobot,20,carrotPiece(6),objectTr_Dobot);
+RMRCMotion(robot1,transl(0.1,0,0)*pose_Default_Dobot,20,speedMax_Dobot,carrotPiece(6),objectTr_Dobot);
 robot1.MoveGripper(25);
 
 % back to the default position
-RMRCMotion(robot1,pose_Default_Dobot,40);
+RMRCMotion(robot1,pose_Default_Dobot,40,speedMax_Dobot);
 robot1.MoveGripper(0);
 
 %% Dorna push the final piece down
@@ -242,16 +246,16 @@ robot1.MoveGripper(0);
 adjustTr_final = transl(0,0,-(slice+0.004)*6)*objectTr_Dorna;
 
 % top left 
-RMRCMotion(robot2,transl(-0.1,0,0)*pose_Default_Dorna,50);
+RMRCMotion(robot2,transl(-0.1,0,0)*pose_Default_Dorna,50,speedMax_Dorna);
 
 % bottom left
-RMRCMotion(robot2,transl(-0.1,0,-0.06)*pose_Default_Dorna,50);
+RMRCMotion(robot2,transl(-0.1,0,-0.06)*pose_Default_Dorna,50,speedMax_Dorna);
 
 % bottom right
-RMRCMotion(robot2,pose_Third_Dorna,50,carrotPiece(6),adjustTr_final);
+RMRCMotion(robot2,pose_Third_Dorna,50,speedMax_Dorna,carrotPiece(6),adjustTr_final);
 
 RandominBowl(carrotPiece(6));
 
 % back to default position
-RMRCMotion(robot2,pose_Default_Dorna,100);
+RMRCMotion(robot2,pose_Default_Dorna,100,speedMax_Dorna);
 
