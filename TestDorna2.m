@@ -1,33 +1,39 @@
+% Test the cutting operation of Dorna 2
+
+% set path
+addpath(genpath('./ProjectProperties'));
+
+%%
 robot = Dorna2Robot;
 robot.model.base = transl([0.77 0 0]) * trotz(pi);
 robot.MoveRobot(robot.model.getpos);
 
-pose_First = nan(4,4,5);
-pose_Second = nan(4,4,5);
+poseFirst = nan(4,4,5);
+poseSecond = nan(4,4,5);
 
-q_First =   [0   -61    82   -20         0] * pi/180;
-defaultJoint = [0 -78 102 -25 0]*pi/180;
-pose_Default = robot.model.fkine(defaultJoint);
-robot.MoveRobot(defaultJoint);
+qFirst =   [0   -61    82   -20         0] * pi/180;
+jointDefault = [0 -78 102 -25 0]*pi/180;
+poseDefault = robot.model.fkine(jointDefault);
+robot.MoveRobot(jointDefault);
 
-pose_First(:,:,1) = robot.model.fkine(q_First);
+poseFirst(:,:,1) = robot.model.fkine(qFirst);
 
-pose_Second(:,:,1) = transl([0 0 -0.04]) * pose_First(:,:,1);
+poseSecond(:,:,1) = transl([0 0 -0.04]) * poseFirst(:,:,1);
 
-pose_Third = transl([0 0 -0.05]) * pose_Default;
+poseThird = transl([0 0 -0.05]) * poseDefault;
 
 
 slice = 0.017;
 
 for i = 1:4
-    pose_First(:,:,i+1) = transl(-slice,0,0)*pose_First(:,:,i);
-    pose_Second(:,:,i+1) = transl(-slice,0,0)*pose_Second(:,:,i);
+    poseFirst(:,:,i+1) = transl(-slice,0,0)*poseFirst(:,:,i);
+    poseSecond(:,:,i+1) = transl(-slice,0,0)*poseSecond(:,:,i);
 end
 
 % cutting operation
 for i =1:5
-    RMRCMotion(robot,pose_First(:,:,i),50);
-    RMRCMotion(robot,pose_Second(:,:,i),50);
-    RMRCMotion(robot,pose_Third,50,carrotPiece(i));
-    RMRCMotion(robot,pose_Default,50);
+    RMRCMotion(robot,poseFirst(:,:,i),50);
+    RMRCMotion(robot,poseSecond(:,:,i),50);
+    RMRCMotion(robot,poseThird,50,carrotPiece(i));
+    RMRCMotion(robot,poseDefault,50);
 end

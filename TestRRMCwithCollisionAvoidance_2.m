@@ -1,20 +1,27 @@
 clear
 % close all
 
-carrot = Veggie('Carrot.ply',transl(0,-0.276,0.02),[255,128,0]/255);
-robot1 = DobotMagicianwithGripper;
+% set path
+addpath(genpath('./ProjectProperties'));
 
+%%
+CreateEnvironment();
+carrot = Veggie('Carrot.ply',transl(0,-0.276,0.02),[255,128,0]/255);
+
+robot1 = DobotMagicianwithGripper;
 robot2 = Dorna2Robot;
+
 robot2.model.base = transl([0.77 0 0]) * trotz(pi);
 robot2.MoveRobot(robot2.model.getpos);
 
 % minimum max speed of the two robot
 speedMax_Dobot = deg2rad(320);
 speedMax_Dorna = deg2rad(450);
+% lighting gouraud
 
 %%  Set up for Dobot
 view([34.58 27.20])
-
+% grid off
 pause()
 
 xlim([-0.65 3.56])
@@ -52,7 +59,7 @@ damping_coefficient_MAX = 0.05;
 
 % random collision trigger:
 %checkCollision = randi([1,steps+10],1,1);
-checkCollision = 8;
+checkCollision = steps + 1;
 
 count = 0;
 pause();
@@ -68,7 +75,7 @@ while error_displacement_dobot > 0.003
 
     % check collision and try to avoid
     if count == checkCollision
-        disp(['Collision detected at step ',num2str(count)]);
+%         disp(['Collision detected at step ',num2str(count)]);
 
         % try to avoid that collision if possible
         if (count/steps) < 3/5

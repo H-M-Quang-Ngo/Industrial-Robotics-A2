@@ -1,5 +1,9 @@
 clear 
 clf
+
+% set path
+addpath(genpath('./ProjectProperties'));
+
 %% load robots
 robot1 = DobotMagicianwithGripper;
 robot2 = Dorna2Robot;
@@ -10,7 +14,7 @@ robot2.MoveRobot(robot2.model.getpos);
 % Create image target (points in the image plane) 
 pStar = [631 400 400 631; 400 400 631 631];
 
-%Create 3D points
+%Create four 3D points on Dorna 2 Robot
 P=[0.4,0.4,0.4,0.4;
 -0.025,0.025,0.025,-0.025;
  0.25,0.25,0.2,0.2];
@@ -21,13 +25,18 @@ cam = CentralCamera('focal', 0.08, 'pixel', 10e-5, ...
 'resolution', [1024 1024], 'centre', [512 512],'name', 'DobotCamera');
 
 % frame rate
-fps = 60;
+fps = 30;
 
 % Define values
 % gain of the controler
 lambda = 0.8;
 
 %% Display
+xlim([-0.29 1.05])
+ylim([-0.95 0.83])
+zlim([-0.22 1.34])
+view([227.15 15.28])
+
 % plot camera and points
 q0 = deg2rad([0 13 50 -20 0])';
 robot1.MoveRobot(q0');
@@ -37,28 +46,36 @@ cam.T = Tc0;
 
 % Display points in 3D and the camera
 % cam.plot_camera('Tcam',Tc0,'scale',0.05);
-plot_sphere(P, 0.015, 'b')
+h = patch(P(1,:),P(2,:),P(3,:),'b');
 lighting gouraud
 light
+
+
+%% Trajectory for the Dorna
+T1 = robot2.model.fkine(robot2.jointDefault);
+TrDorna = ctraj(T1,transl(0.07,0,0)*T1,200);
+qDorna = robot2.model.ikcon(TrDorna,robot2.jointDefault);
+
+% Dorna and its points move
+for i = 1:numrows(qDorna)
+    robot2.MoveRobot(qDorna(i,:))
+    P = homtrans(transl(0.07/200,0,0),P);
+    h.Vertices =  homtrans(transl(0.07/200,0,0),h.Vertices')';
+end
 
 %% Project points to the image
 cam.clf()
 p = cam.plot(P, 'Tcam', Tc0);
 cam.hold(true);
 cam.plot(pStar, '*'); % create the camera view
-
-%% Trajectory for the Dorna
-T1 = robot2.model.fkine(robot2.jointDefault);
-T_Dorna = ctraj(T1,transl(0,0,-0.1)*T1,200);
-q_Dorna = robot2.model.ikcon(T_Dorna,robot2.jointDefault);
+pause()
 
 %% Loop of the visual servoing
-ksteps = 0;
-while true
-        ksteps = ksteps + 1;
-        % Dorna Move
-        robot2.MoveRobot(q_Dorna(ksteps,:))
-        
+eMax = 100;
+
+while eMax > 15
+%         ksteps = ksteps + 1;
+
         % compute the view of the camera
         uv = cam.plot(P);
         
@@ -108,30 +125,14 @@ while true
         Tc = robot1.model.fkine(q)*troty(-pi/2)*trotz(pi/2);
         cam.T = Tc;
 
-%         drawnow
-        
-        % update the history variables
-%         hist.uv = uv(:);
-%         vel = v;
-%         hist.vel = vel;
-%         hist.e = e;
-%         hist.en = norm(e);
-%         hist.jcond = cond(J);
-%         hist.Tcam = Tc;
-%         hist.vel_p = vel;
-%         hist.uv_p = uv;
-%         hist.qp = qp;
-%         hist.q = q;
-% 
-%         history = [history hist];
-
-%         pause(1/fps)
-
-        if ~isempty(200) && (ksteps > 200)
-            break;
-        end
-        
+%         if ~isempty(200) && (ksteps > 200)
+%             break;
+%         end
+%         
         % update current joint position
         q0 = q;
+
+        % update current error
+        eMax = max(abs(e));
  end 
 

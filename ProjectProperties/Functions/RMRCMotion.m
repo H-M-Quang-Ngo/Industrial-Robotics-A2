@@ -21,7 +21,7 @@ function RMRCMotion(robot,poseFinal,steps,speedMax,object,objectTr)
     
     pointCurrent = poseCurrent(1:3,4);
     pointFinal = poseFinal(1:3,4);
-    error_displacement = norm(pointFinal - pointCurrent);
+    errorDisplacement = norm(pointFinal - pointCurrent);
     
     objectExist = false;
 
@@ -35,7 +35,7 @@ function RMRCMotion(robot,poseFinal,steps,speedMax,object,objectTr)
     count = 0;
     
     %% track the trajectory by RRMC
-    while error_displacement > 0.005
+    while errorDisplacement > 0.005
         % trace the end-effector
         % plot3(poseCurrent(1,4),poseCurrent(2,4),poseCurrent(3,4),'r.');
         
@@ -123,10 +123,10 @@ function RMRCMotion(robot,poseFinal,steps,speedMax,object,objectTr)
                 
         % calculate the current error to the goal
         pointCurrent = poseCurrent(1:3,4);
-        error_displacement = norm(pointFinal - pointCurrent);
+        errorDisplacement = norm(pointFinal - pointCurrent);
     
         count = count+1;
     end
     
-    % disp(['Current error is ',num2str(1000* error_displacement),'mm.']);
+    % disp(['Current error is ',num2str(1000* errorDisplacement),'mm.']);
 end

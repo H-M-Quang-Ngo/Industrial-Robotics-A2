@@ -1,6 +1,10 @@
 clear
 close all
 
+% set path
+addpath(genpath('./ProjectProperties'));
+
+%%
 r = DobotMagicianwithGripper;
 hold on
 h = PlaceObject('Carrot.ply',[0,-0.276,0.02]);
@@ -54,19 +58,19 @@ for i = 1:steps-1
     if i == steps -1
         currentPose = r.model.fkine(r.model.getpos);
         % current error between the desired pose and the current pose
-        error_displacement = norm(T2(1:3,4) - currentPose(1:3,4));
+        errorDisplacement = norm(T2(1:3,4) - currentPose(1:3,4));
 
         % try to correct the position by jtraj if the error  > 5mm
-        if error_displacement > 0.005
-            disp(['Last step error is ',num2str(1000*error_displacement),'mm > 5mm. A jtraj correction is applied!']);
+        if errorDisplacement > 0.005
+            disp(['Last step error is ',num2str(1000*errorDisplacement),'mm > 5mm. A jtraj correction is applied!']);
             qCorrect = jtraj(r.model.getpos,qPick,steps);
             r.MoveRobot(qCorrect);
         end
 
         % display the final error
         currentPose = r.model.fkine(r.model.getpos);
-        error_displacement = norm(T2(1:3,4) - currentPose(1:3,4));
-        disp(['Current error is ',num2str(1000* error_displacement),'mm.']);
+        errorDisplacement = norm(T2(1:3,4) - currentPose(1:3,4));
+        disp(['Current error is ',num2str(1000* errorDisplacement),'mm.']);
     end
 end
 

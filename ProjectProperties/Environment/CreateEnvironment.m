@@ -1,6 +1,7 @@
 function CreateEnvironment(~)
     axis ([-1 6 -3 2.8 -1 3])
 %   grid on
+    hold on
     xlabel ('X');
     ylabel ('Y');
     zlabel ('Z');
@@ -45,9 +46,9 @@ function CreateEnvironment(~)
     PlaceObject("Env_LightCurtain.ply", [ 0.1 0.1 -0.08]);
     PlaceObject("Env_LightCurtain.ply", [ 0.1 -1 -0.08]);
     
-    carrotColor = [255,128,0]/255;
-    
-    Veggie('Carrot.ply',transl(0.03,-0.32,0.02),carrotColor);
+%     carrotColor = [255,128,0]/255;
+%     
+%     Veggie('Carrot.ply',transl(0.03,-0.32,0.02),carrotColor);
     
     camlight
 end
